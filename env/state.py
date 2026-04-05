@@ -23,7 +23,7 @@ class Entity(BaseModel):
 class Observation(BaseModel):
     
     document_text: str
-    detected_entities: List[Entity] = []
+    detected_entities: List[Entity] = Field(default_factory=list)
     risk_level: RiskLevel = RiskLevel.LOW
     task_type: TaskType
     step_count: int = 0
