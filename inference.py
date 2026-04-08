@@ -11,41 +11,41 @@ from agent.pii_policy import build_rule_based_action
 
 load_dotenv()
 
+LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME", "")
 API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4o-mini")
 HF_TOKEN = os.getenv("HF_TOKEN", "").strip()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
 ENV_BASE_URL = os.getenv("ENV_BASE_URL", "http://localhost:7860")
+BENCHMARK = os.getenv("BENCHMARK", "safepii-rl")
 
 MAX_STEPS = {"easy": 5, "medium": 8, "hard": 15}
 TASKS = ["easy", "medium", "hard"]
-ENV_NAME = "safepii-rl"
+SUCCESS_SCORE_THRESHOLD = 0.5
+
+
+def _bool_text(value: bool) -> str:
+    return str(value).lower()
 
 
 def log_start(task: str, env: str, model: str) -> None:
-    payload = {"task": task, "env": env, "model": model}
-    print(f"[START] {json.dumps(payload)}", flush=True)
+    print(f"[START] task={task} env={env} model={model}", flush=True)
 
 
-def log_step(step: int, action: dict[str, Any], reward: float, done: bool, error: str | None) -> None:
-    payload = {
-        "step": step,
-        "action": action,
-        "reward": reward,
-        "done": done,
-        "error": error,
-    }
-    print(f"[STEP] {json.dumps(payload)}", flush=True)
+def log_step(step: int, action: str, reward: float, done: bool, error: str | None) -> None:
+    error_val = error if error else "null"
+    print(
+        f"[STEP] step={step} action={action} reward={reward:.2f} done={_bool_text(done)} error={error_val}",
+        flush=True,
+    )
 
 
 def log_end(success: bool, steps: int, score: float, rewards: list[float]) -> None:
-    payload = {
-        "success": success,
-        "steps": steps,
-        "score": score,
-        "rewards": rewards,
-    }
-    print(f"[END] {json.dumps(payload)}", flush=True)
+    rewards_str = ",".join(f"{r:.2f}" for r in rewards)
+    print(
+        f"[END] success={_bool_text(success)} steps={steps} score={score:.2f} rewards={rewards_str}",
+        flush=True,
+    )
 
 
 def _extract_json(raw: str) -> dict[str, Any]:
@@ -97,7 +97,7 @@ def create_client() -> OpenAI:
     if HF_TOKEN:
         return OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
     if OPENAI_API_KEY:
-        return OpenAI(api_key=OPENAI_API_KEY)
+        return OpenAI(base_url=API_BASE_URL, api_key=OPENAI_API_KEY)
     raise RuntimeError("Missing credentials: set OPENAI_API_KEY for OpenAI or HF_TOKEN for custom endpoint.")
 
 
@@ -108,61 +108,74 @@ def run_task(client: OpenAI, task: str) -> float:
     score = 0.0
     observation: dict[str, Any] = {}
 
-    log_start(task=task, env=ENV_NAME, model=MODEL_NAME)
-    response = requests.post(f"{ENV_BASE_URL}/reset", json={"task_type": task}, timeout=30)
-    response.raise_for_status()
-    observation = response.json()
+    log_start(task=task, env=BENCHMARK, model=MODEL_NAME)
+    try:
+        response = requests.post(f"{ENV_BASE_URL}/reset", json={"task_type": task}, timeout=30)
+        response.raise_for_status()
+        observation = response.json()
 
-    for step in range(1, MAX_STEPS[task] + 1):
-        if observation.get("done"):
-            break
-        error = None
-        try:
-            action = model_action(client, task, observation.get("document_text", ""), step)
-            action = normalize_action(action, task, step, observation.get("document_text", ""))
-        except Exception as exc:
-            error = str(exc)
-            action = rule_based_action(
-                task,
-                step,
-                observation.get("document_text", ""),
-                observation.get("detected_entities", []),
-            )
+        for step in range(1, MAX_STEPS[task] + 1):
+            if observation.get("done"):
+                break
 
-        step_response = requests.post(f"{ENV_BASE_URL}/step", json={"action": action}, timeout=30)
-        step_response.raise_for_status()
-        result = step_response.json()
-        observation = result["observation"]
-        reward = float(result.get("reward", {}).get("value", 0.0))
-        done = bool(result.get("done", False))
-        rewards.append(reward)
-        steps_taken = step
-        log_step(step=step, action=action, reward=reward, done=done, error=error)
-        if done:
-            break
+            error = None
+            try:
+                action = model_action(client, task, observation.get("document_text", ""), step)
+                action = normalize_action(action, task, step, observation.get("document_text", ""))
+            except Exception as exc:
+                error = str(exc)
+                action = rule_based_action(
+                    task,
+                    step,
+                    observation.get("document_text", ""),
+                    observation.get("detected_entities", []),
+                )
 
-    grader_payload = {
-        "task_type": task,
-        "pred_entities": observation.get("detected_entities", []),
-        "pred_risk": observation.get("risk_level"),
-        "redacted_text": observation.get("document_text"),
-        "steps_used": observation.get("step_count", steps_taken),
-    }
-    grade_response = requests.post(f"{ENV_BASE_URL}/grader", json=grader_payload, timeout=30)
-    grade_response.raise_for_status()
-    score = float(grade_response.json().get("score", 0.0))
-    score = min(max(score, 0.0), 1.0)
-    success = score >= 0.5
-    log_end(success=success, steps=steps_taken, score=score, rewards=rewards)
+            step_response = requests.post(f"{ENV_BASE_URL}/step", json={"action": action}, timeout=30)
+            step_response.raise_for_status()
+            result = step_response.json()
+
+            observation = result.get("observation", {})
+            reward = float(result.get("reward", {}).get("value", 0.0))
+            reward = min(max(reward, 0.0), 1.0)
+            done = bool(result.get("done", False))
+            info = result.get("info", {})
+            step_error = info.get("last_action_error")
+            error = step_error if step_error else error
+
+            rewards.append(reward)
+            steps_taken = step
+            action_str = json.dumps(action, separators=(",", ":"), ensure_ascii=True)
+            log_step(step=step, action=action_str, reward=reward, done=done, error=error)
+
+            if done:
+                break
+
+        grader_payload = {
+            "task_type": task,
+            "pred_entities": observation.get("detected_entities", []),
+            "pred_risk": observation.get("risk_level"),
+            "redacted_text": observation.get("document_text"),
+            "steps_used": observation.get("step_count", steps_taken),
+        }
+        grade_response = requests.post(f"{ENV_BASE_URL}/grader", json=grader_payload, timeout=30)
+        grade_response.raise_for_status()
+        score = float(grade_response.json().get("score", 0.0))
+        score = min(max(score, 0.0), 1.0)
+        success = score >= SUCCESS_SCORE_THRESHOLD
+    except Exception:
+        score = 0.0
+        success = False
+    finally:
+        log_end(success=success, steps=steps_taken, score=score, rewards=rewards)
+
     return score
 
 
 def main() -> None:
     client = create_client()
-    scores: dict[str, float] = {}
     for task in TASKS:
-        scores[task] = run_task(client, task)
-    print(json.dumps({"final_scores": scores}, indent=2), flush=True)
+        run_task(client, task)
 
 
 if __name__ == "__main__":
