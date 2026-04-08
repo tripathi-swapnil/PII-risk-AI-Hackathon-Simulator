@@ -67,8 +67,9 @@ All grader scores are clamped in `[0.0, 1.0]` and deterministic.
 ## Local Setup
 
 ```bash
-pip install -r requirements.txt
-uvicorn app:app --host 0.0.0.0 --port 7860
+# Install uv (one-time): https://docs.astral.sh/uv/getting-started/installation/
+uv sync --frozen
+uv run uvicorn app:app --host 0.0.0.0 --port 7860
 ```
 
 ## Docker / Hugging Face
@@ -115,17 +116,17 @@ The script emits structured logs with `[START]`, `[STEP]`, `[END]`.
 ## Validation
 
 ```bash
-openenv validate
+uv run openenv validate
 ```
 
 If missing:
 
 ```bash
-pip install openenv-core
+uv add openenv-core
 ```
 
 ## Tests
 
 ```bash
-python -m unittest discover -s tests -v
+uv run python -m unittest discover -s tests -v
 ```
