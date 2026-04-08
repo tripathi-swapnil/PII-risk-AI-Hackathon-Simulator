@@ -27,8 +27,9 @@ def health() -> dict[str, str]:
 
 
 @router.post("/reset")
-def reset(payload: ResetRequest) -> Observation:
-    return ENV.reset(payload.task_type)
+def reset(payload: ResetRequest | None = None) -> Observation:
+    task_type = payload.task_type if payload is not None else TaskType.EASY
+    return ENV.reset(task_type)
 
 
 @router.post("/step", response_model=StepResponse)

@@ -47,6 +47,15 @@ class TestAPI(unittest.TestCase):
         self.assertIn("medium", payload["scores"])
         self.assertIn("hard", payload["scores"])
 
+    def test_reset_accepts_missing_or_empty_body(self) -> None:
+        no_body = self.client.post("/reset")
+        self.assertEqual(no_body.status_code, 200)
+        self.assertEqual(no_body.json().get("task_type"), "easy")
+
+        empty_body = self.client.post("/reset", json={})
+        self.assertEqual(empty_body.status_code, 200)
+        self.assertEqual(empty_body.json().get("task_type"), "easy")
+
 
 if __name__ == "__main__":
     unittest.main()

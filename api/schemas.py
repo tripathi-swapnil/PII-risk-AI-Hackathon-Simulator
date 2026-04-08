@@ -8,7 +8,7 @@ from env.state import Entity, Observation, TaskType
 
 
 class ResetRequest(BaseModel):
-    task_type: TaskType
+    task_type: TaskType = TaskType.EASY
 
 
 class StepRequest(BaseModel):
