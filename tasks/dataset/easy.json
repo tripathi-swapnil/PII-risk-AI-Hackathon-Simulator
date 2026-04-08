@@ -1,0 +1,117 @@
+[
+  {
+    "id": "easy-1",
+    "text": "Contact John Smith at john.smith@example.com for onboarding.",
+    "entities": [
+      {"text": "John Smith", "label": "NAME"},
+      {"text": "john.smith@example.com", "label": "EMAIL"}
+    ]
+  },
+  {
+    "id": "easy-2",
+    "text": "Please call +91 9876543210 before 5 PM.",
+    "entities": [
+      {"text": "+91 9876543210", "label": "PHONE"}
+    ]
+  },
+  {
+    "id": "easy-3",
+    "text": "Employee Jane Doe can be reached at jane.doe@corp.io.",
+    "entities": [
+      {"text": "Jane Doe", "label": "NAME"},
+      {"text": "jane.doe@corp.io", "label": "EMAIL"}
+    ]
+  },
+  {
+    "id": "easy-4",
+    "text": "For support, email Rahul Mehta at rahul.mehta@service.net.",
+    "entities": [
+      {"text": "Rahul Mehta", "label": "NAME"},
+      {"text": "rahul.mehta@service.net", "label": "EMAIL"}
+    ]
+  },
+  {
+    "id": "easy-5",
+    "text": "Primary contact is Sofia Khan and backup phone is +1 202-555-0192.",
+    "entities": [
+      {"text": "Sofia Khan", "label": "NAME"},
+      {"text": "+1 202-555-0192", "label": "PHONE"}
+    ]
+  },
+  {
+    "id": "easy-6",
+    "text": "Send the invoice to arun.verma@billing.org by EOD.",
+    "entities": [
+      {"text": "arun.verma@billing.org", "label": "EMAIL"}
+    ]
+  },
+  {
+    "id": "easy-7",
+    "text": "The caller identified herself as Maria Lopez on +44 20 7946 0958.",
+    "entities": [
+      {"text": "Maria Lopez", "label": "NAME"},
+      {"text": "+44 20 7946 0958", "label": "PHONE"}
+    ]
+  },
+  {
+    "id": "easy-8",
+    "text": "Write to devansh.patel@alpha.ai and mark Priya Nair on CC.",
+    "entities": [
+      {"text": "devansh.patel@alpha.ai", "label": "EMAIL"},
+      {"text": "Priya Nair", "label": "NAME"}
+    ]
+  },
+  {
+    "id": "easy-9",
+    "text": "Emergency callback number: +49 1512 3456789.",
+    "entities": [
+      {"text": "+49 1512 3456789", "label": "PHONE"}
+    ]
+  },
+  {
+    "id": "easy-10",
+    "text": "Account owner Ethan Brown confirmed via ethan.brown@mailhub.com.",
+    "entities": [
+      {"text": "Ethan Brown", "label": "NAME"},
+      {"text": "ethan.brown@mailhub.com", "label": "EMAIL"}
+    ]
+  },
+  {
+    "id": "easy-11",
+    "text": "Reach operations lead Kavya Iyer at +91 9123456780.",
+    "entities": [
+      {"text": "Kavya Iyer", "label": "NAME"},
+      {"text": "+91 9123456780", "label": "PHONE"}
+    ]
+  },
+  {
+    "id": "easy-12",
+    "text": "Please mail onboarding details to liam.wilson@newhire.co.",
+    "entities": [
+      {"text": "liam.wilson@newhire.co", "label": "EMAIL"}
+    ]
+  },
+  {
+    "id": "easy-13",
+    "text": "Nora Ahmed called from +971 50 123 4567 about her ticket.",
+    "entities": [
+      {"text": "Nora Ahmed", "label": "NAME"},
+      {"text": "+971 50 123 4567", "label": "PHONE"}
+    ]
+  },
+  {
+    "id": "easy-14",
+    "text": "Escalate to samuel.lee@platform.dev for urgent platform incidents.",
+    "entities": [
+      {"text": "samuel.lee@platform.dev", "label": "EMAIL"}
+    ]
+  },
+  {
+    "id": "easy-15",
+    "text": "Dispatch note signed by Aisha Roy and shared at aisha.roy@dispatch.io.",
+    "entities": [
+      {"text": "Aisha Roy", "label": "NAME"},
+      {"text": "aisha.roy@dispatch.io", "label": "EMAIL"}
+    ]
+  }
+]

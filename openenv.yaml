@@ -1,0 +1,13 @@
+name: safepii-rl
+description: Risk-Calibrated PII Compliance Environment for AI Agents
+version: 1.0.0
+tasks:
+  - easy
+  - medium
+  - hard
+action_types:
+  - detect
+  - classify
+  - redact
+  - escalate
+  - finalize

@@ -1,0 +1,146 @@
+[
+  {
+    "id": "hard-1",
+    "text": "KYC form: Name: Arjun Patel, SSN 123-45-6789, account HDFC0001234567890, email arjun@bank.com.",
+    "entities": [
+      {"text": "Arjun Patel", "label": "NAME"},
+      {"text": "123-45-6789", "label": "SSN"},
+      {"text": "HDFC0001234567890", "label": "BANK_ACCOUNT"},
+      {"text": "arjun@bank.com", "label": "EMAIL"}
+    ]
+  },
+  {
+    "id": "hard-2",
+    "text": "Insurance claim from Priya Menon (DOB 04 July 1988), Aadhaar 9999-8888-7777, address 77 Palm Ave.",
+    "entities": [
+      {"text": "Priya Menon", "label": "NAME"},
+      {"text": "04 July 1988", "label": "DOB"},
+      {"text": "9999-8888-7777", "label": "AADHAAR"},
+      {"text": "77 Palm Ave", "label": "ADDRESS"}
+    ]
+  },
+  {
+    "id": "hard-3",
+    "text": "Audit note: Client Noah Lee called from +1 212-555-0101 and shared account 55667788990011.",
+    "entities": [
+      {"text": "Noah Lee", "label": "NAME"},
+      {"text": "+1 212-555-0101", "label": "PHONE"},
+      {"text": "55667788990011", "label": "BANK_ACCOUNT"}
+    ]
+  },
+  {
+    "id": "hard-4",
+    "text": "Case file A17: Employee Mira Shah, SSN 765-43-2109, lives at 18 Sunrise Colony, reachable at mira.shah@corp-sec.com.",
+    "entities": [
+      {"text": "Mira Shah", "label": "NAME"},
+      {"text": "765-43-2109", "label": "SSN"},
+      {"text": "18 Sunrise Colony", "label": "ADDRESS"},
+      {"text": "mira.shah@corp-sec.com", "label": "EMAIL"}
+    ]
+  },
+  {
+    "id": "hard-5",
+    "text": "Loan review memo: Aadhaar 2222-3333-4444 submitted by Karan Gill; salary account AXIS009988776655 and DOB 10 Oct 1991.",
+    "entities": [
+      {"text": "2222-3333-4444", "label": "AADHAAR"},
+      {"text": "Karan Gill", "label": "NAME"},
+      {"text": "AXIS009988776655", "label": "BANK_ACCOUNT"},
+      {"text": "10 Oct 1991", "label": "DOB"}
+    ]
+  },
+  {
+    "id": "hard-6",
+    "text": "Payment dispute record: Olivia Kent reported unauthorized transfer from account 4455667788990011 and can be contacted at +44 7911 123456.",
+    "entities": [
+      {"text": "Olivia Kent", "label": "NAME"},
+      {"text": "4455667788990011", "label": "BANK_ACCOUNT"},
+      {"text": "+44 7911 123456", "label": "PHONE"}
+    ]
+  },
+  {
+    "id": "hard-7",
+    "text": "Background verification packet: Name Ethan Cole, SSN 111-22-3333, email ethan.cole@verify.io, address 200 Harbor Street.",
+    "entities": [
+      {"text": "Ethan Cole", "label": "NAME"},
+      {"text": "111-22-3333", "label": "SSN"},
+      {"text": "ethan.cole@verify.io", "label": "EMAIL"},
+      {"text": "200 Harbor Street", "label": "ADDRESS"}
+    ]
+  },
+  {
+    "id": "hard-8",
+    "text": "Fraud alert: Aadhaar 5555-6666-7777 tied to account ICIC123450009999 and registered owner Sana Qureshi.",
+    "entities": [
+      {"text": "5555-6666-7777", "label": "AADHAAR"},
+      {"text": "ICIC123450009999", "label": "BANK_ACCOUNT"},
+      {"text": "Sana Qureshi", "label": "NAME"}
+    ]
+  },
+  {
+    "id": "hard-9",
+    "text": "Hospital transfer note: Patient Leo Park (DOB 29 Feb 1984), SSN 909-88-7777, emergency phone +1 646-555-0102.",
+    "entities": [
+      {"text": "Leo Park", "label": "NAME"},
+      {"text": "29 Feb 1984", "label": "DOB"},
+      {"text": "909-88-7777", "label": "SSN"},
+      {"text": "+1 646-555-0102", "label": "PHONE"}
+    ]
+  },
+  {
+    "id": "hard-10",
+    "text": "Remittance request from Nisha Rao includes beneficiary account 7766554433221100 and confirmation mail nisha.rao@money.net.",
+    "entities": [
+      {"text": "Nisha Rao", "label": "NAME"},
+      {"text": "7766554433221100", "label": "BANK_ACCOUNT"},
+      {"text": "nisha.rao@money.net", "label": "EMAIL"}
+    ]
+  },
+  {
+    "id": "hard-11",
+    "text": "Due diligence document: Aadhaar 3141-5926-5358, address 12 Crescent Road, and contact owner Farhan Ali.",
+    "entities": [
+      {"text": "3141-5926-5358", "label": "AADHAAR"},
+      {"text": "12 Crescent Road", "label": "ADDRESS"},
+      {"text": "Farhan Ali", "label": "NAME"}
+    ]
+  },
+  {
+    "id": "hard-12",
+    "text": "Travel reimbursement audit lists SSN 202-55-0199 for consultant Irene Novak with card-linked account 6655443322110099.",
+    "entities": [
+      {"text": "202-55-0199", "label": "SSN"},
+      {"text": "Irene Novak", "label": "NAME"},
+      {"text": "6655443322110099", "label": "BANK_ACCOUNT"}
+    ]
+  },
+  {
+    "id": "hard-13",
+    "text": "Escalation ticket: client Haruto Sato, DOB 07 Jan 1979, Aadhaar 8080-7070-6060, reachable at haruto.sato@securemail.jp.",
+    "entities": [
+      {"text": "Haruto Sato", "label": "NAME"},
+      {"text": "07 Jan 1979", "label": "DOB"},
+      {"text": "8080-7070-6060", "label": "AADHAAR"},
+      {"text": "haruto.sato@securemail.jp", "label": "EMAIL"}
+    ]
+  },
+  {
+    "id": "hard-14",
+    "text": "Collections case summary: borrower Emma Clark provided account 9988776655443322 and SSN 303-66-8821 from 45 Oak Terrace.",
+    "entities": [
+      {"text": "Emma Clark", "label": "NAME"},
+      {"text": "9988776655443322", "label": "BANK_ACCOUNT"},
+      {"text": "303-66-8821", "label": "SSN"},
+      {"text": "45 Oak Terrace", "label": "ADDRESS"}
+    ]
+  },
+  {
+    "id": "hard-15",
+    "text": "Security review transcript: Aadhaar 1212-3434-5656 referenced alongside account SBIN0001234509876 and callback +91 8899001122 for Dev Malhotra.",
+    "entities": [
+      {"text": "1212-3434-5656", "label": "AADHAAR"},
+      {"text": "SBIN0001234509876", "label": "BANK_ACCOUNT"},
+      {"text": "+91 8899001122", "label": "PHONE"},
+      {"text": "Dev Malhotra", "label": "NAME"}
+    ]
+  }
+]
