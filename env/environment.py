@@ -111,7 +111,7 @@ class SafePIIEnvironment:
         if action.action_type not in cfg["allowed_actions"]:
             obs.constraint_violated = True
             obs.feedback = f"Action {action.action_type.value} not allowed for {obs.task_type.value}."
-            reward = -1.0
+            reward = 0.0
             obs.done = True
             return obs, reward, True, info
 
@@ -146,7 +146,7 @@ class SafePIIEnvironment:
                 obs.constraint_violated = True
                 obs.feedback = "Critical leakage detected in redaction."
                 obs.done = True
-                return obs, -1.0, True, {"constraint": "critical_leakage"}
+                return obs, 0.0, True, {"constraint": "critical_leakage"}
             base_reward = 0.4
             obs.feedback = "Redaction accepted."
             obs.document_text = redacted

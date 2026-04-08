@@ -3,6 +3,10 @@ from env.risk_engine import compute_risk_score
 from env.state import Entity
 
 
+def _clamp_reward(value: float) -> float:
+    return max(0.0, min(1.0, value))
+
+
 def compute_reward(
     action_type: ActionType,
     base_reward: float,
@@ -15,4 +19,4 @@ def compute_reward(
     reward = base_reward
     if action_type in {ActionType.DETECT, ActionType.CLASSIFY, ActionType.REDACT}:
         reward = base_reward - (0.3 * risk_score / max(1, len(gold_entities)))
-    return round(reward, 4)
+    return round(_clamp_reward(reward), 4)

@@ -21,6 +21,8 @@ class TestSafePIIEnvironment(unittest.TestCase):
         obs, reward, done, info = self.env.step(action)
 
         self.assertIsInstance(reward, float)
+        self.assertGreaterEqual(reward, 0.0)
+        self.assertLessEqual(reward, 1.0)
         self.assertIsInstance(done, bool)
         self.assertIsInstance(info, dict)
         self.assertIn("gold_risk", info)
@@ -39,7 +41,7 @@ class TestSafePIIEnvironment(unittest.TestCase):
 
         self.assertTrue(done)
         self.assertTrue(obs.constraint_violated)
-        self.assertEqual(reward, -1.0)
+        self.assertEqual(reward, 0.0)
 
 
 if __name__ == "__main__":
