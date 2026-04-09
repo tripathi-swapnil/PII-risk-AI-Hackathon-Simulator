@@ -2,9 +2,19 @@ import json
 import os
 from typing import Any
 
-from dotenv import load_dotenv
 import requests
-from openai import OpenAI
+
+try:
+    from dotenv import load_dotenv
+except Exception:  # pragma: no cover
+    def load_dotenv() -> bool:  # type: ignore[override]
+        return False
+
+
+try:
+    from openai import OpenAI
+except Exception:  # pragma: no cover
+    OpenAI = None  # type: ignore[assignment]
 
 from agent.pii_policy import build_rule_based_action
 
@@ -59,7 +69,7 @@ def _extract_json(raw: str) -> dict[str, Any]:
         return {}
 
 
-def model_action(client: OpenAI, task: str, document_text: str, step: int) -> dict[str, Any]:
+def model_action(client: Any, task: str, document_text: str, step: int) -> dict[str, Any]:
     prompt = (
         "Return only JSON with keys action_type, confidence, spans(optional), "
         "classification(optional), redacted_text(optional), reasoning(optional). "
@@ -93,15 +103,20 @@ def normalize_action(action: dict[str, Any], task: str, step: int, document_text
     return normalized
 
 
-def create_client() -> OpenAI:
-    if HF_TOKEN:
-        return OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
-    if OPENAI_API_KEY:
-        return OpenAI(base_url=API_BASE_URL, api_key=OPENAI_API_KEY)
-    raise RuntimeError("Missing credentials: set OPENAI_API_KEY for OpenAI or HF_TOKEN for custom endpoint.")
+def create_client() -> tuple[Any | None, str | None]:
+    if OpenAI is None:
+        return None, "openai_client_unavailable"
+    try:
+        if HF_TOKEN:
+            return OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN), None
+        if OPENAI_API_KEY:
+            return OpenAI(base_url=API_BASE_URL, api_key=OPENAI_API_KEY), None
+        return None, "missing_api_credentials"
+    except Exception as exc:  # pragma: no cover
+        return None, str(exc)
 
 
-def run_task(client: OpenAI, task: str) -> float:
+def run_task(client: Any | None, task: str, client_error: str | None = None) -> float:
     rewards: list[float] = []
     steps_taken = 0
     success = False
@@ -118,12 +133,21 @@ def run_task(client: OpenAI, task: str) -> float:
             if observation.get("done"):
                 break
 
-            error = None
-            try:
-                action = model_action(client, task, observation.get("document_text", ""), step)
-                action = normalize_action(action, task, step, observation.get("document_text", ""))
-            except Exception as exc:
-                error = str(exc)
+            error = client_error
+            if client is not None:
+                try:
+                    action = model_action(client, task, observation.get("document_text", ""), step)
+                    action = normalize_action(action, task, step, observation.get("document_text", ""))
+                    error = None
+                except Exception as exc:
+                    error = str(exc)
+                    action = rule_based_action(
+                        task,
+                        step,
+                        observation.get("document_text", ""),
+                        observation.get("detected_entities", []),
+                    )
+            else:
                 action = rule_based_action(
                     task,
                     step,
@@ -173,9 +197,9 @@ def run_task(client: OpenAI, task: str) -> float:
 
 
 def main() -> None:
-    client = create_client()
+    client, client_error = create_client()
     for task in TASKS:
-        run_task(client, task)
+        run_task(client, task, client_error=client_error)
 
 
 if __name__ == "__main__":
