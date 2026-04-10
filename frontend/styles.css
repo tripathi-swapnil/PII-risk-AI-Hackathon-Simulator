@@ -1,0 +1,224 @@
+:root {
+  --bg: #f6f3ea;
+  --ink: #1a1f1c;
+  --muted: #5a6660;
+  --panel: #fffef9;
+  --line: #d7d3c6;
+  --primary: #005f73;
+  --primary-ink: #ecfeff;
+  --accent: #ee9b00;
+  --shadow: 0 12px 24px rgba(0, 25, 40, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(circle at 10% -5%, #ffe7b1 0, transparent 42%),
+    radial-gradient(circle at 90% 0%, #b9e7ee 0, transparent 35%),
+    var(--bg);
+  color: var(--ink);
+  font-family: "Space Grotesk", sans-serif;
+  min-height: 100%;
+}
+
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  background-image: linear-gradient(rgba(0, 95, 115, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 95, 115, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.shell {
+  position: relative;
+  z-index: 1;
+  width: min(1100px, calc(100% - 2rem));
+  margin: 1.25rem auto 2rem;
+  display: grid;
+  gap: 1rem;
+  animation: fade-up 520ms ease-out;
+}
+
+.hero {
+  background: linear-gradient(130deg, #003845 0%, #005f73 54%, #0a9396 100%);
+  color: #e8fffd;
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow);
+}
+
+.eyebrow {
+  margin: 0;
+  font-family: "Chivo Mono", monospace;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  opacity: 0.9;
+}
+
+.hero h1 {
+  margin: 0.2rem 0 0.35rem;
+  font-size: clamp(1.7rem, 3.5vw, 2.4rem);
+}
+
+.subtitle {
+  margin: 0;
+  max-width: 70ch;
+  opacity: 0.92;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 0.95rem;
+  box-shadow: var(--shadow);
+}
+
+.controls {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.control-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.control-row label {
+  font-weight: 600;
+}
+
+.btn-row {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+button,
+select,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #ffffff;
+  color: var(--ink);
+  padding: 0.52rem 0.78rem;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 30, 50, 0.13);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+button.primary {
+  background: var(--primary);
+  border-color: transparent;
+  color: var(--primary-ink);
+}
+
+.action-types .action-btn {
+  background: #f9faf7;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0.8rem 0;
+}
+
+label {
+  display: grid;
+  gap: 0.3rem;
+  color: var(--muted);
+  font-size: 0.94rem;
+}
+
+select,
+input,
+textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.45rem 0.55rem;
+  background: #fff;
+  color: var(--ink);
+}
+
+textarea {
+  resize: vertical;
+}
+
+.grid.two-col {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.code-view,
+.log-view {
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fcfcf7;
+  padding: 0.7rem;
+  font-family: "Chivo Mono", monospace;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  min-height: 130px;
+  overflow: auto;
+}
+
+.log-view {
+  min-height: 180px;
+  max-height: 280px;
+}
+
+.log-line {
+  margin-bottom: 0.45rem;
+  border-left: 3px solid var(--accent);
+  padding-left: 0.45rem;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 840px) {
+  .grid.two-col {
+    grid-template-columns: 1fr;
+  }
+
+  .shell {
+    width: min(1100px, calc(100% - 1.2rem));
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}

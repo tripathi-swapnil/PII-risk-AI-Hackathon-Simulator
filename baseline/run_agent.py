@@ -17,6 +17,14 @@ except ImportError:  # pragma: no cover
 load_dotenv()
 
 
+def _create_ai_client(use_ai: bool) -> Any | None:
+    api_base_url = os.getenv("API_BASE_URL", "").strip().rstrip("/")
+    api_key = os.getenv("API_KEY", "").strip()
+    if use_ai and OpenAI and api_base_url and api_key:
+        return OpenAI(base_url=api_base_url, api_key=api_key)
+    return None
+
+
 def _action_from_dict(data: dict[str, Any], task_type: TaskType, step_idx: int, document_text: str) -> Action:
     fallback = build_rule_based_action(task_type, step_idx, document_text)
     action_type = data.get("action_type") or fallback["action_type"]
@@ -91,10 +99,7 @@ def _ai_action(client: Any, env: SafePIIEnvironment, task_type: TaskType, step_i
 def run_single_task(task_type: TaskType, use_ai: bool = True) -> float:
     env = SafePIIEnvironment()
     obs = env.reset(task_type)
-    client = None
-    api_key = os.getenv("OPENAI_API_KEY", "").strip()
-    if use_ai and OpenAI and api_key:
-        client = OpenAI(api_key=api_key)
+    client = _create_ai_client(use_ai=use_ai)
     step_idx = 0
     while True:
         if client is not None:

@@ -127,8 +127,8 @@ def _risk_from_entities(entities: list[dict[str, Any]]) -> str:
 def redact_text(document_text: str, entities: list[dict[str, Any]]) -> str:
     redacted = document_text
     for ent in sorted(entities, key=lambda item: item["start"], reverse=True):
-        placeholder = f"[REDACTED_{ent['label']}]"
-        redacted = redacted[: ent["start"]] + placeholder + redacted[ent["end"] :]
+        redaction_token = f"[REDACTED_{ent['label']}]"
+        redacted = redacted[: ent["start"]] + redaction_token + redacted[ent["end"] :]
     return redacted
 
 

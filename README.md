@@ -91,12 +91,22 @@ docker run -p 7860:7860 safepii-rl
 
 HF Space should use Docker SDK and expose port `7860`.
 
+## Frontend Console
+
+- The app now ships with a built-in frontend at `/`.
+- It is served by the same FastAPI process/container used for API evaluation.
+- In Hugging Face Spaces, open your Space URL and use the Mission Console to:
+	- reset a task,
+	- run step actions,
+	- inspect current state,
+	- call grader and baseline endpoints.
+
 ## Baseline and Inference
 
 ### API baseline endpoint
 
 - `POST /baseline` with `{"use_ai": true}` for OpenAI-backed run.
-- Uses `OPENAI_API_KEY` and optional `OPENAI_MODEL` in server environment.
+- Uses `API_BASE_URL`, `API_KEY`, and optional `OPENAI_MODEL` in server environment.
 
 ### Current baseline scores
 
@@ -132,10 +142,4 @@ If missing:
 
 ```bash
 uv add openenv-core
-```
-
-## Tests
-
-```bash
-uv run python -m unittest discover -s tests -v
 ```
