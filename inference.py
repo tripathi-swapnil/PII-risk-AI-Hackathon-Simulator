@@ -1,8 +1,8 @@
 import json
 import os
 from typing import Any
-
-import requests
+from urllib import error as urlerror
+from urllib import request as urlrequest
 
 try:
     from dotenv import load_dotenv
@@ -69,6 +69,29 @@ def _extract_json(raw: str) -> dict[str, Any]:
         return {}
 
 
+def _http_post_json(url: str, payload: dict[str, Any], timeout: float = 30.0) -> dict[str, Any]:
+    body = json.dumps(payload).encode("utf-8")
+    req = urlrequest.Request(
+        url,
+        data=body,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urlrequest.urlopen(req, timeout=timeout) as response:
+            raw = response.read().decode("utf-8", errors="replace")
+    except urlerror.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"HTTP {exc.code} for {url}: {detail}") from exc
+    except urlerror.URLError as exc:
+        raise RuntimeError(f"Network error for {url}: {exc}") from exc
+
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"Invalid JSON response from {url}: {raw[:200]}") from exc
+
+
 def model_action(client: Any, task: str, document_text: str, step: int) -> dict[str, Any]:
     prompt = (
         "Return only JSON with keys action_type, confidence, spans(optional), "
@@ -125,9 +148,11 @@ def run_task(client: Any | None, task: str, client_error: str | None = None) -> 
 
     log_start(task=task, env=BENCHMARK, model=MODEL_NAME)
     try:
-        response = requests.post(f"{ENV_BASE_URL}/reset", json={"task_type": task}, timeout=30)
-        response.raise_for_status()
-        observation = response.json()
+        observation = _http_post_json(
+            f"{ENV_BASE_URL}/reset",
+            {"task_type": task},
+            timeout=30,
+        )
 
         for step in range(1, MAX_STEPS[task] + 1):
             if observation.get("done"):
@@ -155,9 +180,11 @@ def run_task(client: Any | None, task: str, client_error: str | None = None) -> 
                     observation.get("detected_entities", []),
                 )
 
-            step_response = requests.post(f"{ENV_BASE_URL}/step", json={"action": action}, timeout=30)
-            step_response.raise_for_status()
-            result = step_response.json()
+            result = _http_post_json(
+                f"{ENV_BASE_URL}/step",
+                {"action": action},
+                timeout=30,
+            )
 
             observation = result.get("observation", {})
             reward = float(result.get("reward", {}).get("value", 0.0))
@@ -182,9 +209,12 @@ def run_task(client: Any | None, task: str, client_error: str | None = None) -> 
             "redacted_text": observation.get("document_text"),
             "steps_used": observation.get("step_count", steps_taken),
         }
-        grade_response = requests.post(f"{ENV_BASE_URL}/grader", json=grader_payload, timeout=30)
-        grade_response.raise_for_status()
-        score = float(grade_response.json().get("score", 0.0))
+        grade_response = _http_post_json(
+            f"{ENV_BASE_URL}/grader",
+            grader_payload,
+            timeout=30,
+        )
+        score = float(grade_response.get("score", 0.0))
         score = min(max(score, 0.0), 1.0)
         success = score >= SUCCESS_SCORE_THRESHOLD
     except Exception:
