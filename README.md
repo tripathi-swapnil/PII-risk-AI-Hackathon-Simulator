@@ -115,9 +115,8 @@ Root script: `inference.py`
 Required env vars:
 
 - `API_BASE_URL` (LLM API endpoint)
+- `API_KEY` (LLM proxy API key)
 - `MODEL_NAME` (LLM model)
-- `HF_TOKEN` (HF/API token used by OpenAI client in inference)
-- Optional local fallback: `OPENAI_API_KEY`
 - Optional: `LOCAL_IMAGE_NAME` if using docker-image-based environment execution
 - Optional: `ENV_BASE_URL` (environment API URL, default `http://localhost:7860`)
 

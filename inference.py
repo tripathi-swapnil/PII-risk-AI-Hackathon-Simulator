@@ -26,10 +26,9 @@ except Exception:  # pragma: no cover
 load_dotenv()
 
 LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME", "")
-API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
+API_BASE_URL = os.getenv("API_BASE_URL", "").strip().rstrip("/")
+API_KEY = os.getenv("API_KEY", "").strip()
 MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4o-mini")
-HF_TOKEN = os.getenv("HF_TOKEN", "").strip()
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
 ENV_BASE_URL = os.getenv("ENV_BASE_URL", "http://localhost:7860")
 BENCHMARK = os.getenv("BENCHMARK", "safepii-rl")
 
@@ -73,12 +72,20 @@ def _extract_json(raw: str) -> dict[str, Any]:
         return {}
 
 
-def _http_post_json(url: str, payload: dict[str, Any], timeout: float = 30.0) -> dict[str, Any]:
+def _http_post_json(
+    url: str,
+    payload: dict[str, Any],
+    timeout: float = 30.0,
+    headers: dict[str, str] | None = None,
+) -> dict[str, Any]:
     body = json.dumps(payload).encode("utf-8")
+    request_headers = {"Content-Type": "application/json"}
+    if headers:
+        request_headers.update(headers)
     req = urlrequest.Request(
         url,
         data=body,
-        headers={"Content-Type": "application/json"},
+        headers=request_headers,
         method="POST",
     )
     try:
@@ -102,12 +109,33 @@ def model_action(client: Any, task: str, document_text: str, step: int) -> dict[
         "classification(optional), redacted_text(optional), reasoning(optional). "
         f"Task={task}, Step={step}. Document={document_text}"
     )
-    completion = client.chat.completions.create(
-        model=MODEL_NAME,
-        temperature=0,
-        messages=[{"role": "user", "content": prompt}],
+    if client is not None:
+        completion = client.chat.completions.create(
+            model=MODEL_NAME,
+            temperature=0,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        content = completion.choices[0].message.content or "{}"
+        return _extract_json(content)
+
+    if not API_BASE_URL or not API_KEY:
+        raise RuntimeError("missing_proxy_credentials")
+
+    proxy_response = _http_post_json(
+        f"{API_BASE_URL}/chat/completions",
+        {
+            "model": MODEL_NAME,
+            "temperature": 0,
+            "messages": [{"role": "user", "content": prompt}],
+        },
+        timeout=30,
+        headers={"Authorization": f"Bearer {API_KEY}"},
     )
-    content = completion.choices[0].message.content or "{}"
+    content = (
+        proxy_response.get("choices", [{}])[0]
+        .get("message", {})
+        .get("content", "{}")
+    )
     return _extract_json(content)
 
 
@@ -170,14 +198,14 @@ def normalize_action(action: dict[str, Any], task: str, step: int, document_text
 
 
 def create_client() -> tuple[Any | None, str | None]:
+    if not API_BASE_URL or not API_KEY:
+        return None, "missing_proxy_credentials"
+
     if OpenAI is None:
-        return None, "openai_client_unavailable"
+        return None, "openai_client_unavailable_using_http_proxy_fallback"
+
     try:
-        if HF_TOKEN:
-            return OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN), None
-        if OPENAI_API_KEY:
-            return OpenAI(base_url=API_BASE_URL, api_key=OPENAI_API_KEY), None
-        return None, "missing_api_credentials"
+        return OpenAI(base_url=API_BASE_URL, api_key=API_KEY), None
     except Exception as exc:  # pragma: no cover
         return None, str(exc)
 
@@ -202,20 +230,12 @@ def run_task(client: Any | None, task: str, client_error: str | None = None) -> 
                 break
 
             error = client_error
-            if client is not None:
-                try:
-                    action = model_action(client, task, observation.get("document_text", ""), step)
-                    action = normalize_action(action, task, step, observation.get("document_text", ""))
-                    error = None
-                except Exception as exc:
-                    error = str(exc)
-                    action = rule_based_action(
-                        task,
-                        step,
-                        observation.get("document_text", ""),
-                        observation.get("detected_entities", []),
-                    )
-            else:
+            try:
+                action = model_action(client, task, observation.get("document_text", ""), step)
+                action = normalize_action(action, task, step, observation.get("document_text", ""))
+                error = None
+            except Exception as exc:
+                error = str(exc)
                 action = rule_based_action(
                     task,
                     step,
