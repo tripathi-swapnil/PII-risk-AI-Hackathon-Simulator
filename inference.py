@@ -35,6 +35,8 @@ BENCHMARK = os.getenv("BENCHMARK", "safepii-rl")
 MAX_STEPS = {"easy": 5, "medium": 8, "hard": 15}
 TASKS = ["easy", "medium", "hard"]
 SUCCESS_SCORE_THRESHOLD = 0.5
+MIN_STRICT_SCORE = 0.01
+MAX_STRICT_SCORE = 0.99
 
 
 def _bool_text(value: bool) -> str:
@@ -70,6 +72,11 @@ def _extract_json(raw: str) -> dict[str, Any]:
         return json.loads(raw[start : end + 1])
     except json.JSONDecodeError:
         return {}
+
+
+def _strict_task_score(value: float) -> float:
+    # Keep score strictly inside (0, 1) while remaining stable with 2-decimal logging.
+    return min(max(float(value), MIN_STRICT_SCORE), MAX_STRICT_SCORE)
 
 
 def _http_post_json(
@@ -277,11 +284,10 @@ def run_task(client: Any | None, task: str, client_error: str | None = None) -> 
             grader_payload,
             timeout=30,
         )
-        score = float(grade_response.get("score", 0.0))
-        score = min(max(score, 0.0), 1.0)
+        score = _strict_task_score(float(grade_response.get("score", 0.0)))
         success = score >= SUCCESS_SCORE_THRESHOLD
     except Exception:
-        score = 0.0
+        score = MIN_STRICT_SCORE
         success = False
     finally:
         log_end(success=success, steps=steps_taken, score=score, rewards=rewards)

@@ -84,6 +84,17 @@ class TestInferenceProxyConfig(unittest.TestCase):
             self.assertEqual(captured["headers"], {"Authorization": "Bearer proxy-key"})
             self.assertEqual(action.get("action_type"), "finalize")
 
+    def test_strict_task_score_bounds_are_exclusive(self) -> None:
+        inference = self._reload_inference()
+        self.assertEqual(inference._strict_task_score(0.0), 0.01)
+        self.assertEqual(inference._strict_task_score(-1.0), 0.01)
+        self.assertEqual(inference._strict_task_score(1.0), 0.99)
+        self.assertEqual(inference._strict_task_score(2.0), 0.99)
+
+    def test_strict_task_score_keeps_interior_value(self) -> None:
+        inference = self._reload_inference()
+        self.assertAlmostEqual(inference._strict_task_score(0.42), 0.42)
+
 
 if __name__ == "__main__":
     unittest.main()
